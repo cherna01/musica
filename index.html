@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de música - Retiro Emaús</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @media print {
+            /* Oculta todo menos el esquema */
+            body * {
+                visibility: hidden;
+            }
+            #esquema, #esquema * {
+                visibility: visible;
+            }
+            #esquema {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+        }
+        /* Estilo para el esquema impreso */
+        .esquema-item {
+            background-color: #f0f4f8;
+            border-left: 6px solid #3b82f6;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Logo -->
+    <div class="p-5 text-center">
+        <img src="https://purissimabetera.es/wp-content/uploads/2020/11/Slide1_Pic2_636843678245890989.png" alt="Logo Emaús" class="mx-auto">
+    </div>
+
+    <!-- Formulario -->
+    <div class="max-w-4xl mx-auto bg-white p-8 shadow-lg rounded-lg">
+        <h1 class="text-2xl font-bold mb-5">Servicio de música - Retiro Emaús</h1>
+        <div class="mb-4">
+            <label class="block mb-2 text-lg">Día:</label>
+            <select id="dia" class="w-full p-2 border rounded">
+                <option value="viernes">Viernes</option>
+                <option value="sábado">Sábado</option>
+                <option value="domingo">Domingo</option>
+                <option value="viernes a domingo">Viernes a Domingo (Todo el retiro)</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-lg">Hora (si aplica):</label>
+            <input type="time" id="hora" class="w-full p-2 border rounded">
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-lg">Dinámica:</label>
+            <select id="dinamica" class="w-full p-2 border rounded">
+                <option value="Sala de charlas">Sala de charlas</option>
+                <option value="Máscaras">Máscaras</option>
+                <option value="Comedor">Comedor</option>
+                <option value="Santísimo">Santísimo</option>
+                <option value="Sanación de los recuerdos">Sanación de los recuerdos</option>
+                <option value="Hoja de pecados">Hoja de pecados</option>
+                <option value="Quema de pecados">Quema de pecados</option>
+                <option value="Carta de Jesús">Carta de Jesús</option>
+                <option value="Pared">Pared</option>
+                <option value="Confesiones">Confesiones</option>
+                <option value="Lectura de cartas">Lectura de cartas</option>
+                <option value="Ceremonia de perdón">Ceremonia de perdón</option>
+                <option value="otra">Otra (especificar abajo)</option>
+            </select>
+            <input type="text" id="otraDinamica" class="w-full p-2 border rounded mt-2 hidden" placeholder="Especifica nueva dinámica">
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-lg">Equipos a utilizar:</label>
+            <div class="grid grid-cols-2 gap-2">
+                <label><input type="checkbox" value="Micrófono con cable" class="mr-2"> Micrófono con cable</label>
+                <label><input type="checkbox" value="Micrófono inalámbrico" class="mr-2"> Micrófono inalámbrico</label>
+                <label><input type="checkbox" value="Carro portátil" class="mr-2"> Carro portátil</label>
+                <label><input type="checkbox" value="Karaoke" class="mr-2"> Karaoke</label>
+                <label><input type="checkbox" value="Altavoz portátil pequeño" class="mr-2"> Altavoz portátil pequeño</label>
+                <label><input type="checkbox" value="Pendrive" class="mr-2"> Pendrive</label>
+                <label><input type="checkbox" value="iPad/iPhone" class="mr-2"> iPad/iPhone</label>
+                <label><input type="checkbox" value="Ordenador" class="mr-2"> Ordenador</label>
+            </div>
+        </div>
+        <button onclick="agregarDinamica()" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Agregar dinámica</button>
+    </div>
+
+    <!-- Tabla de dinámicas -->
+    <div class="max-w-4xl mx-auto mt-5">
+        <table id="tabla" class="w-full table-auto bg-white rounded-lg shadow-lg">
+            <thead class="bg-blue-500 text-white">
+                <tr>
+                    <th class="px-4 py-2">Día</th>
+                    <th class="px-4 py-2">Hora</th>
+                    <th class="px-4 py-2">Dinámica</th>
+                    <th class="px-4 py-2">Equipos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Contenido dinámico generado por JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botones -->
+    <div class="max-w-4xl mx-auto mt-5 flex justify-between">
+        <button onclick="verEsquema()" class="bg-yellow-500 text-white px-4 py-2 rounded-lg">Generar esquema</button>
+        <button onclick="imprimirEsquema()" class="bg-green-500 text-white px-4 py-2 rounded-lg">Imprimir Esquema</button>
+        <button onclick="resetTabla()" class="bg-red-500 text-white px-4 py-2 rounded-lg">Reset</button>
+    </div>
+
+    <!-- Esquema de horarios visual -->
+    <div id="esquema" class="mt-5 hidden max-w-4xl mx-auto">
+        <h2 class="text-xl font-semibold mb-3 text-gray-700">Esquema de horarios:</h2>
+        <div id="esquema-contenedor" class="grid grid-cols-3 gap-4">
+            <!-- Esquema dinámico se generará aquí -->
+        </div>
+    </div>
+
+    <script>
+        let dinamicas = JSON.parse(localStorage.getItem("dinamicas")) || [];
+
+        // Mostrar campo de texto si seleccionan "Otra"
+        document.getElementById("dinamica").addEventListener("change", function() {
+            const otraDinamica = document.getElementById("otraDinamica");
+            if (this.value === "otra") {
+                otraDinamica.classList.remove("hidden");
+            } else {
+                otraDinamica.classList.add("hidden");
+                otraDinamica.value = ""; // Limpiar el campo si se oculta
+            }
+        });
+
+        function agregarDinamica() {
+            const dia = document.getElementById("dia").value;
+            const hora = document.getElementById("hora").value || "Todo el retiro";
+            let dinamica = document.getElementById("dinamica").value;
+            if (dinamica === "otra") {
+                dinamica = document.getElementById("otraDinamica").value;
+            }
+            const equipos = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+
+            if (dinamica && equipos.length > 0) {
+                dinamicas.push({ dia, hora, dinamica, equipos });
+                localStorage.setItem("dinamicas", JSON.stringify(dinamicas));
+                actualizarTabla();
+                ordenarTabla();
+                resetEquipos();
+            }
+        }
+
+        function actualizarTabla() {
+            const tabla = document.querySelector("#tabla tbody");
+            tabla.innerHTML = ""; // Limpiar la tabla antes de agregar nuevas filas
+            dinamicas = JSON.parse(localStorage.getItem("dinamicas")) || [];
+
+            dinamicas.forEach(item => {
+                const nuevaFila = document.createElement("tr");
+                nuevaFila.innerHTML = `<td class="border p-2">${item.dia}</td><td class="border p-2">${item.hora}</td>
+                <td class="border p-2">${item.dinamica}</td><td class="border p-2">${item.equipos.join(", ")}</td>`; tabla.appendChild(nuevaFila); }); }
+                function resetEquipos() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
+
+    function resetTabla() {
+        localStorage.removeItem("dinamicas");
+        dinamicas = [];
+        actualizarTabla();
+    }
+
+    function verEsquema() {
+        const esquemaContenedor = document.getElementById("esquema-contenedor");
+        esquemaContenedor.innerHTML = ""; // Limpiar el esquema antes de agregar nuevos items
+        dinamicas = JSON.parse(localStorage.getItem("dinamicas")) || [];
+
+        dinamicas.forEach(item => {
+            const esquemaItem = document.createElement("div");
+            esquemaItem.className = "esquema-item";
+            esquemaItem.innerHTML = `<strong>${item.dia} - ${item.hora}</strong><br>${item.dinamica}<br><em>Equipos: ${item.equipos.join(", ")}</em>`;
+            esquemaContenedor.appendChild(esquemaItem);
+        });
+
+        document.getElementById("esquema").classList.remove("hidden");
+    }
+
+    function imprimirEsquema() {
+        window.print();
+        document.getElementById("esquema").classList.add("hidden");
+    }
+
+    function ordenarTabla() {
+        dinamicas.sort((a, b) => {
+            const ordenDias = { "viernes": 1, "sábado": 2, "domingo": 3, "viernes a domingo": 4 };
+            if (ordenDias[a.dia] !== ordenDias[b.dia]) {
+                return ordenDias[a.dia] - ordenDias[b.dia];
+            }
+            return a.hora.localeCompare(b.hora);
+        });
+        actualizarTabla();
+    }
+
+    // Cargar las dinámicas desde LocalStorage al cargar la página
+    window.onload = function() {
+        actualizarTabla();
+        ordenarTabla();
+    }
+</script>
+</body> </html> ```
